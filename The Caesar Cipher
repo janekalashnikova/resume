@@ -1,0 +1,69 @@
+def ask():
+    direct = input('Укажите, что будем делать: шифровать (ш) или дешифровать (д)? ')
+    while direct != 'ш' and direct != 'д':
+        direct = input('Укажите, что будем делать: шифровать (ш) или дешифровать (д)? ')
+    lan = input('Укажите, какой язык используем: русский (р) или английский (а)? ')
+    while lan != 'р' and lan != 'а':
+        lan = input('Укажите, какой язык используем: русский (р) или английский (а)? ')
+    shag = input('Укажите сдвиг для шифровки или дешифровки: ')
+    while not shag.isdigit():
+        shag = input('Укажите сдвиг для шифровки или дешифровки: ')
+    sroka = input('Введите предложение: ')
+    return direct, lan, shag, sroka
+
+
+russian_letters_small = 'абвгдежзийклмнопрстуфхцчшщъыьэюя'
+russian_letters_big = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
+english_letters_small = 'abcdefghijklmnopqrstuvwxyz'
+english_letters_big = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+
+def coding(st, lang, h):
+    h = int(h)
+    res = ''
+    if lang == 'р':
+        for i in st:
+            if i in russian_letters_small:
+                res += russian_letters_small[(russian_letters_small.index(i) + h) % 32]
+            elif i in russian_letters_big:
+                res += russian_letters_big[(russian_letters_big.index(i) + h) % 32]
+            elif i not in russian_letters_small and i not in russian_letters_big:
+                res += i
+    if lang == 'а':
+        for i in st:
+            if i in english_letters_small:
+                res += english_letters_small[(english_letters_small.index(i) + h) % 26]
+            elif i in english_letters_big:
+                res += english_letters_big[(english_letters_big.index(i) + h) % 26]
+            elif i not in english_letters_small and i not in english_letters_big:
+                res += i
+    return res
+
+
+def decoding(st, lang, h):
+    h = int(h)
+    res = ''
+    if lang == 'р':
+        for i in st:
+            if i in russian_letters_small:
+                res += russian_letters_small[(russian_letters_small.index(i) - h) % 32]
+            elif i in russian_letters_big:
+                res += russian_letters_big[(russian_letters_big.index(i) - h) % 32]
+            elif i not in russian_letters_small and i not in russian_letters_big:
+                res += i
+    if lang == 'а':
+        for i in st:
+            if i in english_letters_small:
+                res += english_letters_small[(english_letters_small.index(i) - h) % 26]
+            elif i in english_letters_big:
+                res += english_letters_big[(english_letters_big.index(i) - h) % 26]
+            elif i not in english_letters_small and i not in english_letters_big:
+                res += i
+    return res
+
+
+direction, language, step, s = ask()
+if direction == 'ш':
+    print(coding(s, language, step))
+elif direction == 'д':
+    print(decoding(s, language, step))
