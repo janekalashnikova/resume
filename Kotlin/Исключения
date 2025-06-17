@@ -1,0 +1,42 @@
+fun main() {
+    val wheel = Wheel(1.0)
+    wheel.pumpUp(-10)
+    wheel.pumpUp(20)
+    wheel.pumpUp(0)
+    wheel.checkUp()
+    wheel.pumpUp(1)
+    wheel.checkUp()
+    wheel.pumpUp(2)
+    wheel.checkUp()
+}
+
+class TooHighPressure : Throwable(message = "Too High Pressure")
+class TooLowPressure : Throwable(message = "Too Low Pressure")
+class IncorrectPressure : Throwable(message = "Incorrect Pressure")
+
+class Wheel(private var currentPressure: Double) {
+    fun pumpUp(pressure: Int) = try {
+        if (pressure < 0 || pressure > 10) {
+            throw IncorrectPressure()
+        } else {
+            currentPressure += pressure.toDouble()
+            println("При накачке $pressure атмосфер процедура удалась.")
+        }
+    } catch (e: IncorrectPressure) {
+        println("При накачке $pressure атмосфер процедура не удалась.")
+    }
+
+    fun checkUp() {
+        try {
+            when {
+                currentPressure < 1.6 -> throw TooLowPressure()
+                currentPressure > 2.5 -> throw TooHighPressure()
+                else -> println("Эксплуатация возможна.")
+            }
+        } catch (e: TooHighPressure) {
+            println("Эксплуатация невозможна — давление превышает нормальное.")
+        } catch (e: TooLowPressure) {
+            println("Эксплуатация невозможна — давление ниже нормального.")
+        }
+    }
+}
