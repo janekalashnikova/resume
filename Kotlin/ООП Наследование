@@ -1,0 +1,272 @@
+fun main() {
+    // val cat = Animal(currentAge = 4)
+    // println(
+    //   "Имя животного - ${cat.name}, " +
+    //           "энергия - ${cat.energy}, " +
+    //           "максимальный возраст - ${cat.maxAge}, " +
+    //         "текущий возраст - ${cat.currentAge}, " +
+    //          "Вес - ${cat.weight}"
+    //  )
+
+    //val babyCat = cat.baby()
+
+    //val bird = Bird(10,20,10,"Sofi", 7)
+    // val babyBird = bird.baby()
+    // bird.moving()
+
+    val  animals = NatureReserve()
+    animals.lifeCycleNatureReserve(2)
+    // cat.sleeping()
+    // cat.eating()
+    //cat.moving()
+
+    //println("${cat.isTooOld}")
+}
+
+
+
+class NatureReserve {
+
+    private var natureReservePopulation = mutableListOf(
+        Bird(10, 3, 10, "Parrot", 7),
+        Bird(20, 4, 10, "Kakadu", 8),
+        Bird(30, 2, 10, "Hawk", 3),
+        Bird(55, 2, 10, "Owl", 1),
+        Bird(87, 3, 8, "Penguin", 4),
+        Fish(67, 3, 10, "Salmon", 4),
+        Fish(65, 3, 9, "Tuna", 6),
+        Fish(89, 4, 8, "Trout", 5),
+        Dog(56, 20, 20, "Labrador Retriever", 10),
+        Dog(87, 10, 10, "German Shepherd", 2),
+        Animal(76, 50, 20, "Tiger", 10),
+        Animal(89, 60, 30, "Lion", 15),
+        Animal(90, 1200, 50, "Elephant", 30),
+        Animal(56, 500, 40, "Giraffe", 10),
+        Animal(90, 900, 60, "Hippopotamus", 2),
+        Monkey(76, 50, 20, "Makaka", 10),
+        Monkey(89, 60, 30, "Orangutang", 15),
+        Monkey(90, 1200, 50, "Носач", 30),
+        Monkey(56, 500, 40, "Ревун", 10),
+        Monkey(90, 900, 60, "Мандрил", 2),
+        Cat(67, 3, 10, "Люся", 4),
+        Cat(65, 3, 9, "Мурзик", 6),
+        Cat(89, 4, 8, "Барсик", 5)
+    )
+
+    fun lifeCycleNatureReserve(numberOfCycles: Int) {
+        for (numberIteration in 1..numberOfCycles) {
+            if (natureReservePopulation.isEmpty()) {
+                println("Заповедник пустой")
+                return
+            } else {
+                println("Цикл номер - $numberIteration")
+                for (animal in natureReservePopulation.indices) {
+                    when ((1..4).random()) {
+                        1 -> natureReservePopulation[animal].sleeping()
+                        2 -> natureReservePopulation[animal].moving()
+                        3 -> natureReservePopulation[animal].eating()
+                        4 -> {
+                            val child = natureReservePopulation[animal].baby()
+                            child?.let {natureReservePopulation.add(it)}
+                        }
+                    }
+                }
+                removeTooOld()
+                println("Количесто животных в заповеднике ${natureReservePopulation.size} на данный момент")
+            }
+        }
+    }
+
+    private fun removeTooOld() {
+        val iterator = natureReservePopulation.iterator()
+        while (iterator.hasNext()) {
+            val item = iterator.next()
+            if (item.isTooOld) {
+                println("Животное ${item.name} умерло")
+                iterator.remove()
+            }
+        }
+    }
+
+}
+
+
+
+open class Cat(energy: Int, weight: Int, maxAge: Int, name: String, currentAge: Int) :
+    Animal(energy, weight, maxAge, name, currentAge) {
+
+    override fun moving() {
+        super.moving()
+        if (isMoving) {
+            println("идёт")
+        }
+    }
+
+    override fun baby(): Cat {
+        val babyName = this.name
+        val babyMaxAge = this.maxAge
+        val babyEnergy = (1..10).random()
+        val babyWeight = (1..5).random()
+        val babyAnimal = Cat(babyEnergy, babyWeight, babyMaxAge, babyName, 0)
+        println("Рождено животное по имени $babyName. Максимальный возраст - $babyMaxAge. Энергия - $babyEnergy. Вес - $babyWeight.")
+        return babyAnimal
+    }
+}
+
+
+
+open class Monkey(energy: Int, weight: Int, maxAge: Int, name: String, currentAge: Int) :
+    Animal(energy, weight, maxAge, name, currentAge) {
+
+    override fun moving() {
+        super.moving()
+        if (isMoving) {
+            println("прыгает")
+        }
+    }
+
+    override fun baby(): Monkey {
+        val babyName = this.name
+        val babyMaxAge = this.maxAge
+        val babyEnergy = (1..10).random()
+        val babyWeight = (1..5).random()
+        val babyAnimal = Monkey(babyEnergy, babyWeight, babyMaxAge, babyName, 0)
+        println("Рождено животное по имени $babyName. Максимальный возраст - $babyMaxAge. Энергия - $babyEnergy. Вес - $babyWeight.")
+        return babyAnimal
+    }
+}
+
+
+
+open class Fish(energy: Int, weight: Int, maxAge: Int, name: String, currentAge: Int) :
+    Animal(energy, weight, maxAge, name, currentAge) {
+
+    override fun moving() {
+        super.moving()
+        if (isMoving) {
+            println("плывёт")
+        }
+    }
+
+    override fun baby(): Fish {
+        val babyName = this.name
+        val babyMaxAge = this.maxAge
+        val babyEnergy = (1..10).random()
+        val babyWeight = (1..5).random()
+        val babyAnimal = Fish(babyEnergy, babyWeight, babyMaxAge, babyName, 0)
+        println("Рождено животное по имени $babyName. Максимальный возраст - $babyMaxAge. Энергия - $babyEnergy. Вес - $babyWeight.")
+        return babyAnimal
+    }
+}
+
+
+
+open class Dog(energy: Int, weight: Int, maxAge: Int, name: String, currentAge: Int) :
+    Animal(energy, weight, maxAge, name, currentAge) {
+
+    override fun moving() {
+        super.moving()
+        if (isMoving) {
+            println("бежит")
+        }
+    }
+
+    override fun baby(): Dog {
+        val babyName = this.name
+        val babyMaxAge = this.maxAge
+        val babyEnergy = (1..10).random()
+        val babyWeight = (1..5).random()
+        val babyAnimal = Dog(babyEnergy, babyWeight, babyMaxAge, babyName, 0)
+        println("Рождено животное по имени $babyName. Максимальный возраст - $babyMaxAge. Энергия - $babyEnergy. Вес - $babyWeight.")
+        return babyAnimal
+    }
+}
+
+
+
+open class Bird(energy: Int, weight: Int, maxAge: Int, name: String, currentAge: Int) :
+    Animal(energy, weight, maxAge, name, currentAge) {
+
+    override fun moving() {
+        super.moving()
+        if (isMoving) {
+            println("летит")
+        }
+    }
+
+    override fun baby(): Bird {
+        val babyName = this.name
+        val babyMaxAge = this.maxAge
+        val babyEnergy = (1..10).random()
+        val babyWeight = (1..5).random()
+        val babyAnimal = Bird(babyEnergy, babyWeight, babyMaxAge, babyName, 0)
+        println("Рождено животное по имени $babyName. Максимальный возраст - $babyMaxAge. Энергия - $babyEnergy. Вес - $babyWeight.")
+        return babyAnimal
+    }
+}
+
+
+
+import kotlin.random.Random
+
+open class Animal(
+    private var energy: Int = 100,
+    private var weight: Int = 10,
+    val maxAge: Int = 10,
+    val name: String = "Mari",
+    private var currentAge: Int
+) {
+
+    var isMoving: Boolean = false
+    open var isTooOld: Boolean = currentAge >= maxAge
+
+    fun sleeping() {
+        if (currentAge <= maxAge) {
+            energy += 5
+            if (currentAge < maxAge) {
+                currentAge += 1
+            }
+            println("$name спит, вес - $weight, энергия - $energy, текущий возраст - $currentAge")
+        }
+    }
+
+    fun eating() {
+        if (currentAge <= maxAge) {
+            energy += 3
+            weight += 1
+            if (currentAge < maxAge) {
+                tryIncrementAge()
+            }
+            println("$name ест, вес - $weight, энергия - $energy, текущий возраст - $currentAge")
+        }
+    }
+
+    open fun moving() {
+        if (energy > 5 && weight > 1 && currentAge <= maxAge) {
+            energy -= 5
+            weight -= 1
+            if (currentAge < maxAge) {
+                tryIncrementAge()
+            }
+            println("$name передвигается, вес - $weight, энергия - $energy, текущий возраст - $currentAge")
+            isMoving = true
+        } else
+            println("Не может передвигаться")
+    }
+
+    private fun tryIncrementAge() {
+        if (Random.nextBoolean()) {
+            currentAge += 1
+        }
+    }
+
+    open fun baby(): Animal {
+        val babyName = this.name
+        val babyMaxAge = this.maxAge
+        val babyEnergy: Int = Random.nextInt(1, 10)
+        val babyWeight: Int = Random.nextInt(1, 5)
+        val babyAnimal = Animal(babyEnergy, babyWeight, babyMaxAge, babyName, 0)
+        println("Рождено животное по имени $babyName. Максимальный возраст - $babyMaxAge. Энергия - $babyEnergy. Вес - $babyWeight.")
+        return babyAnimal
+    }
+}
