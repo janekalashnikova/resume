@@ -1,0 +1,68 @@
+fun main() {
+    Converters.get("USD").convertRub(1000.0)
+    Converters.get("EUR").convertRub(1000.0)
+    Converters.get("GEL").convertRub(1000.0)
+    Converters.get("GEgvgL").convertRub(1000.0)
+    Converters.get("").convertRub(1000.0)
+}
+
+
+
+interface CurrencyConverter {
+    val currencyCode: String
+    fun convertRub(rub: Double): Double
+}
+
+
+
+class RUBUSD : CurrencyConverter {
+    override val currencyCode: String = "USD"
+
+    override fun convertRub(rub: Double): Double {
+        val usd = (rub * 0.010277)
+        println("$rub рублей = $usd USD")
+        return usd
+    }
+}
+
+
+class RUBEUR : CurrencyConverter {
+    override val currencyCode: String = "EUR"
+
+    override fun convertRub(rub: Double): Double {
+        val eur = (rub * 0.009744)
+        println("$rub рублей = $eur EUR")
+        return eur
+    }
+}
+
+
+class RUBGEL : CurrencyConverter {
+    override val currencyCode: String = "GEL"
+
+    override fun convertRub(rub: Double): Double {
+        val gel = (rub * 0.02767)
+        println("$rub рублей = $gel GEL")
+        return gel
+    }
+}
+
+
+
+object Converters {
+    private val converters: Map<String, CurrencyConverter> = mapOf(
+        "USD" to RUBUSD(),
+        "EUR" to RUBEUR(),
+        "GEL" to RUBGEL()
+    )
+
+    fun get(currencyCode: String): CurrencyConverter {
+        return converters[currencyCode] ?: object : CurrencyConverter {
+            override val currencyCode: String = "Unknown"
+            override fun convertRub(rub: Double): Double {
+                println("Конвертер не найден")
+                return 0.0
+            }
+        }
+    }
+}
