@@ -1,0 +1,87 @@
+import Card.generateCard
+import Card.randomNumbersFlow
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
+object Host {
+    val numbers = flow {
+        while (true) {
+            emit((1..90).random())
+        }
+    }
+}
+
+object Card {
+    val randomNumbersFlow = flow {
+        repeat(90) {
+            emit((1..90).random())
+        }
+    }
+
+    suspend fun generateCard(randomNumbersFlow: Flow<Int>): List<List<Int>> {
+        return coroutineScope {
+            val rows = List(3) { MutableList(9) { 0 } }
+            for (rowIndex in 0..<3) {
+                val numbers = randomNumbersFlow.toList()
+                    .distinct()
+                    .take(5)
+                    .toList()
+                for (number in numbers) {
+                    val position = (number - 1) % 9
+                    rows[rowIndex][position] = number
+                }
+            }
+            return@coroutineScope rows
+        }
+    }
+}
+
+fun main() {
+    runBlocking {
+        launch {
+            println("Старт игры")
+            val players = (2..6).random()
+            val card = generateCard(randomNumbersFlow)
+            for (i in 1..players) {
+                println("\nКарточка игрока №$i")
+                println("|     |     |  B  |  I  |  N  |  G  |  O  |     |     |")
+                println("|-----|-----|-----|-----|-----|-----|-----|-----|-----|")
+                for (row in card) {
+                    for (cell in row) {
+                        print("|")
+                        if (cell != 0) {
+                            print("  ")
+                            print(cell.toString().padStart(2))
+                            print(" ")
+                        } else {
+                            print("     ")
+                        }
+                    }
+                    println("|")
+                    println("|-----|-----|-----|-----|-----|-----|-----|-----|-----|")
+                }
+            }
+        }
+        launch {
+            println("\nДостаём бочонки...")
+            println()
+            var n = 1
+            val uniqueNumbers = mutableListOf<Int>()
+            Host.numbers
+                .filter { number ->
+                    if (!uniqueNumbers.contains(number)) {
+                        uniqueNumbers.add(number)
+                        true
+                    } else {
+                        false
+                    }
+                }
+                .take(90)
+                .collect {
+                    println("Номер бочонка №$n - $it")
+                    n++
+                }
+            println("\nКонец игры")
+        }
+    }
+}
