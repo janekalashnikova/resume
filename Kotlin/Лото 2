@@ -1,0 +1,83 @@
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
+fun generateBarrels(): List<Int> = List(90) { it + 1 }.shuffled()
+fun createCards(numPlayers: Int): List<List<Int>> {
+    val cards = mutableListOf<List<Int>>()
+    repeat(numPlayers) {
+        val card = mutableListOf<Int>()
+        val numbers = mutableListOf<Int>()
+        for (i in 1..90) {
+            numbers.add(i)
+        }
+        numbers.shuffle()
+        repeat(3) {
+            val row = numbers.subList(it * 10, (it + 1) * 10).sorted().subList(0, 5)
+            card.addAll(row)
+        }
+        cards.add(card)
+    }
+    return cards
+}
+
+fun barrelFlow(): Flow<Int> = flow {
+    val barrels = generateBarrels()
+    for (barrel in barrels) {
+        emit(barrel)
+    }
+}
+
+fun checkNumber(card: List<Int>, barrel: Int): Boolean =
+    card.contains(barrel)
+
+fun checkWin(card: List<Int>, markers: List<Boolean>, mode: String): Boolean {
+    if (mode == "rowWin") {
+        val rows = listOf(card.subList(0, 5), card.subList(5, 10), card.subList(10, 15))
+        for (row in rows) {
+            if (row.all { markers[card.indexOf(it)] }) {
+                return true
+            }
+        }
+    } else if (mode == "fullCardWin") {
+        if (card.all { markers[card.indexOf(it)] }) {
+            return true
+        }
+    }
+    return false
+}
+
+fun main() {
+    runBlocking {
+        val numPlayers = (2..6).random()
+        val mode = "rowWin"
+        val cards = createCards(numPlayers)
+        val markers = MutableList(15) { false }
+        println("Карты игроков:")
+        cards.forEachIndexed { index, card ->
+            println("\nИгрок ${index + 1}:")
+            for (i in 0..14 step 5) {
+                println(card.subList(i, i + 5).joinToString(" "))
+            }
+        }
+        println()
+        launch {
+            println("Игра началась!")
+            println()
+            barrelFlow().collect { barrel ->
+                println("Выпал бочонок №$barrel.")
+                for (i in cards.indices) {
+                    if (checkNumber(cards[i], barrel)) {
+                        println("          Игрок ${i + 1} закрыл число $barrel.")
+                        markers[cards[i].indexOf(barrel)] = true
+                        if (checkWin(cards[i], markers, mode)) {
+                            println("\nИгрок ${i + 1} выиграл!")
+                            println("Игра окончена.")
+                            cancel()
+                            return@collect
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
