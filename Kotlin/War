@@ -1,0 +1,338 @@
+import kotlin.random.Random
+
+fun main() {
+    print("Введите количество игроков: ")
+    val numberUsers = readln().toInt()
+    val battle = Battle(numberUsers)
+    while (!battle.isBattleCompleted) {
+        battle.iterationBattle()
+        println(battle.getStateBattle().toString())
+        println("+++++++++++++++++++++++++++++++++++++++++++++++++")
+        Thread.sleep(1000)
+    }
+}
+
+fun Int.chance(): Boolean {
+    return Random.nextInt(0, 100) < this
+}
+
+
+
+
+
+class Soldier : AbstractWarrior(100, 30, Weapons.createPistol()) {
+    override val evasion: Int
+        get() = 10
+}
+
+
+import java.util.Stack
+
+class Stack<T> {
+    private val stack = Stack<T>()
+
+    fun push(item: T) {
+        stack.push(item)
+    }
+
+    fun pop(): T? {
+        return stack.pop()
+    }
+
+    fun isEmpty(): Boolean {
+        return stack.empty()
+    }
+}
+
+
+
+import kotlin.random.Random
+
+class Team(sizeTeam: Int) {
+    var listWarrior = mutableListOf<AbstractWarrior>()
+
+    init {
+        repeat((1..sizeTeam).count()) {
+            listWarrior.add(getRandomWarrior())
+        }
+    }
+
+    private fun getRandomWarrior(): AbstractWarrior {
+        val temp = Random.nextInt(0, 100)
+        return if (temp < 10)
+            General()
+        else if (temp < 40)
+            Captain()
+        else
+            Soldier()
+    }
+
+    fun getSumTeamHP(): Int {
+        return listWarrior.sumOf { it.levelHP }
+    }
+
+    fun getSumTeamWarrior(): Int {
+        var result = 0
+        listWarrior.forEach {
+            if (!it.isKilled)
+                result++
+        }
+        return result
+    }
+
+}
+
+
+
+
+interface Warrior {
+    var isKilled: Boolean
+    val evasion: Int
+
+    fun attack(opponent: Warrior)
+
+    fun takeDamage(damage: Int)
+}
+
+
+
+
+
+import weapon.Ammo
+
+object Weapons {
+
+    fun createPistol() = object : AbstractWeapon(10, FireType.FireSingle) {
+        override fun createAmmo() = Ammo.SIMPLE
+    }
+
+    fun createTwoPistols() = object : AbstractWeapon(20, FireType.FireQueue(2)) {
+        override fun createAmmo() = Ammo.SILVER
+    }
+
+    fun createTomato() = object : AbstractWeapon(30, FireType.FireQueue(3)) {
+        override fun createAmmo() = Ammo.GOLD
+    }
+}
+
+
+
+
+class General : AbstractWarrior(150, 70, Weapons.createTomato()) {
+    override val evasion: Int
+        get() = 30
+}
+
+
+
+
+sealed class FireType(val sizeQueue: Int) {
+
+    data object FireSingle : FireType(1)
+
+    data class FireQueue(val sizeQueueArg: Int) : FireType(sizeQueueArg)
+}
+
+
+
+
+class Captain : AbstractWarrior(130, 50, Weapons.createTwoPistols()) {
+    override val evasion: Int
+        get() = 20
+}
+
+
+
+
+sealed class BattleState {
+
+    class Progress(private val battle: Battle) : BattleState() {
+
+        override fun toString(): String {
+            return """
+            Команда 1:
+                 | Сумма HP: ${battle.team1.getSumTeamHP()}
+                 | Количество живых игроков: ${battle.team1.getSumTeamWarrior()}
+            Команда 2:
+                 | Сумма HP: ${battle.team2.getSumTeamHP()}
+                 | Количество живых игроков: ${battle.team2.getSumTeamWarrior()}
+            """.trimIndent()
+        }
+    }
+
+    object WinOneTeam : BattleState() {
+        override fun toString(): String {
+            return "Команда 1 Победила!"
+        }
+    }
+
+    object WinTwoTeam : BattleState() {
+        override fun toString(): String {
+            return "Команда 2 Победила!"
+        }
+    }
+
+    object Draw : BattleState()
+
+}
+
+
+
+
+
+
+
+class Battle(private val sizeTeam: Int) {
+    val team1: Team = Team(sizeTeam)
+    val team2: Team = Team(sizeTeam)
+    var isBattleCompleted: Boolean = false
+
+    fun getStateBattle(): BattleState {
+        return if (team1.getSumTeamWarrior() > 0 && team2.getSumTeamWarrior() > 0) {
+            BattleState.Progress(this)
+        } else {
+            isBattleCompleted = true
+            if (team2.getSumTeamWarrior() == 0) {
+                BattleState.WinOneTeam
+            } else {
+                BattleState.WinTwoTeam
+            }
+        }
+    }
+
+    fun iterationBattle() {
+        team1.listWarrior.shuffle()
+        team2.listWarrior.shuffle()
+        (0 until sizeTeam).forEach {
+            if (!team1.listWarrior[it].isKilled) {
+                getOpponent(team2)?.let { it1 ->
+                    team1.listWarrior[it].attack(it1)
+                    println("Игрок ${it + 1} из команды 1, аттаковал игрока ${team2.listWarrior.indexOf(it1) + 1} из команды 2")
+                }
+            }
+            if (!team2.listWarrior[it].isKilled) {
+                getOpponent(team1)?.let { it1 ->
+                    team2.listWarrior[it].attack(it1)
+                    println("Игрок ${it + 1} из команды 2, аттаковал игрока ${team1.listWarrior.indexOf(it1) + 1} из команды 1")
+                }
+            }
+        }
+    }
+
+    private fun getOpponent(team: Team): AbstractWarrior? {
+        if (team.getSumTeamWarrior() == 0) {
+            return null
+        } else {
+            while (true) {
+                val i = (0 until team.listWarrior.size).random()
+                if (!team.listWarrior[i].isKilled)
+                    return team.listWarrior[i]
+            }
+        }
+    }
+}
+
+
+
+
+
+package weapon
+
+import chance
+
+enum class Ammo(
+    private val damage: Int,
+    private val chanceCriticalDamage: Int,
+    private val coefficientCriticalDamage: Int,
+) {
+
+    SIMPLE(10, 10, 2),
+    SILVER(20, 20, 3),
+    GOLD(30, 25, 5);
+
+
+    fun getDamage(): Int {
+        return if (chanceCriticalDamage.chance())
+            damage * coefficientCriticalDamage
+        else damage
+    }
+
+}
+
+
+
+
+import weapon.Ammo
+
+abstract class AbstractWeapon(
+    private var maxAmmo: Int,
+    var fireType: FireType,
+) {
+    private var magazineAmmo: Stack<Ammo> = Stack()
+    var isAmmoMagazine: Boolean = !magazineAmmo.isEmpty()
+
+    abstract fun createAmmo(): Ammo
+
+    fun recharge() {
+        magazineAmmo = Stack()
+        repeat((1..maxAmmo).count()) {
+            magazineAmmo.push(createAmmo())
+        }
+        isAmmoMagazine = !magazineAmmo.isEmpty()
+    }
+
+    fun getAmmo(fireType: FireType): MutableList<Ammo> {
+        val resultList = mutableListOf<Ammo>()
+
+        if (!magazineAmmo.isEmpty()) {
+            repeat((1..fireType.sizeQueue).count()) {
+                magazineAmmo.pop()?.let { it1 -> resultList.add(it1) }
+            }
+        }
+        isAmmoMagazine = !magazineAmmo.isEmpty()
+        return resultList
+    }
+}
+
+
+
+
+abstract class AbstractWarrior(
+    maxHP: Int,
+    private val accuracy: Int,
+    private val weapon: AbstractWeapon,
+) : Warrior {
+
+    var levelHP = maxHP
+
+    override var isKilled: Boolean
+        get() = levelHP <= 0
+        set(value) {}
+
+    override fun attack(opponent: Warrior) {
+        if (!weapon.isAmmoMagazine) {
+            weapon.recharge()
+            return
+        } else {
+            var tempDamage = 0
+            weapon.getAmmo(weapon.fireType).forEach {
+                if (accuracy.chance()) {
+                    if (!opponent.evasion.chance()) {
+                        tempDamage += it.getDamage()
+                    }
+                }
+            }
+            opponent.takeDamage(tempDamage)
+        }
+    }
+
+    override fun takeDamage(damage: Int) {
+        if (levelHP <= damage) {
+            levelHP = 0
+            isKilled = true
+        } else {
+            levelHP -= damage
+        }
+    }
+
+}
