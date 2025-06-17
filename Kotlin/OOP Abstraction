@@ -1,0 +1,328 @@
+fun main() {
+    val jane1 = DebitCardJane()
+    jane1.topUp(10000.0)
+    jane1.toPay(5000.0)
+    jane1.getInfoAboutBalance()
+
+    val alex1 = DebitCardAlex()
+    alex1.topUp(10000.0)
+    alex1.toPay(15000.0)
+    alex1.getInfoAboutBalance()
+
+    val max1 = DebitCardMax()
+    max1.topUp(10000.0)
+    max1.toPay(6000.0)
+    max1.getInfoAboutBalance()
+
+    val jane2 = CreditCardJane()
+    jane2.topUp(11000.0)
+    jane2.toPay(5000.0)
+    jane2.getInfoAboutAvailableFunds()
+
+    val alex2 = CreditCardAlex()
+    alex2.topUp(11000.0)
+    alex2.toPay(5000.0)
+    alex2.getInfoAboutAvailableFunds()
+
+    val max2 = CreditCardMax()
+    max2.topUp(11000.0)
+    max2.toPay(6000.0)
+    max2.getInfoAboutAvailableFunds()
+}
+
+
+
+abstract class BankCard {
+abstract var balance: Double
+abstract fun topUp(summa : Double)
+abstract fun toPay(summa : Double)
+abstract fun getInfoAboutBalance()
+abstract fun getInfoAboutAvailableFunds()
+}
+
+
+abstract class DebitCard : BankCard() {
+
+    override fun topUp(summa: Double) {
+        balance += summa
+        println("Баланс дебетовой карты пополнен на: $summa.")
+    }
+
+    override fun getInfoAboutBalance() {
+        println("Текущий баланс дебетовой карты: $balance.")
+    }
+}
+
+
+
+
+abstract class CreditCard : BankCard() {
+    abstract var creditLimit: Double
+    abstract var creditCash: Double
+    abstract var ownCash: Double
+
+    override fun topUp(summa : Double) {
+        val dopSumma: Double
+        creditCash += summa
+        if (creditCash > creditLimit) {
+            dopSumma = creditCash - creditLimit
+            creditCash -= dopSumma
+            ownCash += dopSumma
+        }
+        println("Кредитная карта пополнена на $summa.")
+        println("Кредитные средства: $creditCash.")
+        println("Собственные средства: $ownCash.")
+    }
+
+    override fun toPay(summa : Double) {
+        val dopSumma: Double
+        ownCash -= summa
+        if (ownCash < 0.0) {
+            dopSumma = 0.0 - ownCash
+            ownCash = 0.0
+            creditCash -= dopSumma
+            if (creditCash < 0.0) {
+                println("Недостаточно денег для оплаты.")
+            }
+        }
+        println("Произведена оплата на $summa.")
+        println("Кредитные средства: $creditCash.")
+        println("Собственные средства: $ownCash.")
+    }
+
+    override fun getInfoAboutBalance() {
+        println("Кредитные средства: $creditCash.")
+        println("Собственные средства: $ownCash.")
+    }
+}
+
+
+
+
+class CreditCardMax : CreditCard() {
+    override var creditLimit: Double = 30000.0
+    override var creditCash: Double = 0.0
+    override var ownCash: Double = 0.0
+    override var balance: Double = 0.0
+    private var bonus = 0.0
+    private var dopBonus = 0.0
+
+    override fun getInfoAboutAvailableFunds() {
+        println("Кредитные средства: $creditCash.")
+        println("Собственные средства: $ownCash.")
+        println("Бонусный баланс: $bonus")
+    }
+
+    override fun toPay(summa: Double) {
+        val dopSumma: Double
+        ownCash -= summa
+        if (ownCash < 0.0) {
+            dopSumma = 0.0 - ownCash
+            ownCash = 0.0
+            creditCash -= dopSumma
+            dopBonus += summa
+            if (dopBonus > 5000.0) {
+                bonus += summa / 100 * 5
+            }
+            if (creditCash < 0.0) {
+                println("Недостаточно денег для оплаты.")
+            }
+        }
+        println("Произведена оплата на $summa.")
+        println("Кредитные средства: $creditCash.")
+        println("Собственные средства: $ownCash.")
+    }
+}
+
+
+
+
+
+class CreditCardAlex : CreditCard() {
+    override var creditLimit: Double = 20000.0
+    override var creditCash: Double = 0.0
+    override var ownCash: Double = 0.0
+    override var balance: Double = 0.0
+    private var bonus = 0.0
+
+    override fun getInfoAboutAvailableFunds() {
+        println("Кредитные средства: $creditCash.")
+        println("Собственные средства: $ownCash.")
+        println("Бонусный баланс: $bonus")
+    }
+
+    override fun toPay(summa: Double) {
+        val dopSumma: Double
+        ownCash -= summa
+        if (ownCash < 0.0) {
+            dopSumma = 0.0 - ownCash
+            ownCash = 0.0
+            creditCash -= dopSumma
+            if (creditCash < 0.0) {
+                println("Недостаточно денег для оплаты.")
+            }
+        }
+        println("Произведена оплата на $summa.")
+        println("Кредитные средства: $creditCash.")
+        println("Собственные средства: $ownCash.")
+    }
+
+    override fun topUp(summa: Double) {
+        val dopSumma: Double
+        creditCash += summa
+        bonus += summa / 100 * 0.005
+        if (creditCash > creditLimit) {
+            dopSumma = creditCash - creditLimit
+            creditCash -= dopSumma
+            ownCash += dopSumma
+        }
+        println("Кредитная карта пополнена на $summa.")
+        println("Кредитные средства: $creditCash.")
+        println("Собственные средства: $ownCash.")
+    }
+}
+
+
+
+
+
+class CreditCardJane : CreditCard() {
+    override var creditLimit: Double = 10000.0
+    override var creditCash: Double = 0.0
+    override var ownCash: Double = 0.0
+    override var balance: Double = 0.0
+    private var bonus = 0.0
+
+    override fun toPay(summa: Double) {
+        val dopSumma: Double
+        ownCash -= summa
+        if (ownCash < 0.0) {
+            dopSumma = 0.0 - ownCash
+            ownCash = 0.0
+            creditCash -= dopSumma
+            bonus += summa / 100
+            if (creditCash < 0.0) {
+                println("Недостаточно денег для оплаты.")
+            }
+        }
+        println("Произведена оплата на $summa.")
+        println("Кредитные средства: $creditCash.")
+        println("Собственные средства: $ownCash.")
+    }
+
+    override fun getInfoAboutAvailableFunds() {
+        println("Кредитные средства: $creditCash.")
+        println("Собственные средства: $ownCash.")
+        println("Бонусный баланс: $bonus")
+    }
+}
+
+
+
+class DebitCardAlex : DebitCard() {
+
+    override var balance: Double = 0.0
+    private var bonus: Double = 0.0
+    private var dopSumma: Double = 0.0
+
+    override fun toPay(summa: Double) {
+        dopSumma = balance - summa
+        if (dopSumma >= 0) {
+            balance -= summa
+            println("Баланс дебетовой карты уменьшен на: $summa.")
+        } else {
+            println("Недостаточно денег для оплаты.")
+        }
+    }
+
+    override fun getInfoAboutAvailableFunds() {
+        println("Текущий баланс дебетовой карты: $balance.")
+        println("Бонусный баланс: $bonus.")
+    }
+
+    override fun topUp(summa: Double) {
+        balance += summa
+        bonus += summa / 100 * 0.005
+        println("Баланс дебетовой карты пополнен на: $summa.")
+    }
+
+    override fun getInfoAboutBalance() {
+        println("Текущий баланс дебетовой карты: $balance.")
+        println("Бонусный баланс: $bonus.")
+    }
+}
+
+
+
+
+class DebitCardMax : DebitCard() {
+
+    override var balance: Double = 0.0
+    private var bonus: Double = 0.0
+    private var dopBonus = 0.0
+    private var dopSumma: Double = 0.0
+
+    override fun toPay(summa: Double) {
+        dopSumma = balance - summa
+        if (dopSumma >= 0) {
+            balance -= summa
+            dopBonus += summa
+            if (dopBonus > 5000.0) {
+                bonus += summa / 100 * 5
+            }
+            println("Баланс дебетовой карты уменьшен на: $summa.")
+        } else {
+            println("Недостаточно денег для оплаты.")
+        }
+    }
+
+    override fun getInfoAboutAvailableFunds() {
+        println("Текущий баланс дебетовой карты: $balance.")
+        println("Бонусный баланс: $bonus.")
+    }
+
+    override fun topUp(summa: Double) {
+        balance += summa
+        println("Баланс дебетовой карты пополнен на: $summa.")
+    }
+
+    override fun getInfoAboutBalance() {
+        println("Текущий баланс дебетовой карты: $balance.")
+        println("Бонусный баланс: $bonus.")
+    }
+}
+
+
+
+class DebitCardJane : DebitCard() {
+
+    override var balance: Double = 0.0
+    private var bonus: Double = 0.0
+    private var dopSumma: Double = 0.0
+
+    override fun toPay(summa: Double) {
+        dopSumma = balance - summa
+        if (dopSumma >= 0) {
+            balance -= summa
+            bonus += summa / 100
+            println("Баланс дебетовой карты уменьшен на: $summa.")
+        } else {
+            println("Недостаточно денег для оплаты.")
+        }
+    }
+
+    override fun getInfoAboutAvailableFunds() {
+        println("Текущий баланс дебетовой карты: $balance.")
+        println("Бонусный баланс: $bonus.")
+    }
+
+    override fun topUp(summa: Double) {
+        balance += summa
+        println("Баланс дебетовой карты пополнен на: $summa.")
+    }
+
+    override fun getInfoAboutBalance() {
+        println("Текущий баланс дебетовой карты: $balance.")
+        println("Бонусный баланс: $bonus.")
+    }
+}
