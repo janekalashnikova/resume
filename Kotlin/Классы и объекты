@@ -1,0 +1,115 @@
+class TV(val brand: String, val model: String, val diagonalSize: Int, n: Int) {
+    companion object {
+        const val MAX_VOLUME = 100
+    }
+
+    private var isOn: Boolean = false
+    private var currentChannel: Int = 0
+    private var channels: List<String> = Channels.getRandomChannels(n)
+
+    fun turnOn() {
+        isOn = true
+        println("$brand $model is turned on")
+    }
+
+    fun turnOff() {
+        isOn = false
+        println("$brand $model is turned off")
+    }
+
+    fun increaseVolume(volume: Int) {
+        if (isOn) {
+            val newVolume = (MAX_VOLUME + volume).coerceAtMost(MAX_VOLUME)
+            println("$brand $model volume increased to $newVolume")
+        } else {
+            println("$brand $model is turned off")
+        }
+    }
+
+    fun decreaseVolume(volume: Int) {
+        if (isOn) {
+            val newVolume = (MAX_VOLUME - volume).coerceAtLeast(0)
+            println("$brand $model volume decreased to $newVolume")
+        } else {
+            println("$brand $model is turned off")
+        }
+    }
+
+    fun switchChannel(channel: Int) {
+        if (!isOn) {
+            turnOn()
+        }
+        if (channel in 1..channels.size) {
+            currentChannel = channel
+            println("$brand $model switched to channel $currentChannel: ${channels[currentChannel - 1]}")
+        } else {
+            println("$brand $model does not have channel $channel")
+        }
+    }
+
+    fun switchNextChannel() {
+        if (!isOn) {
+            turnOn()
+        }
+        currentChannel = (currentChannel % channels.size) + 1
+        println("$brand $model switched to channel $currentChannel: ${channels[currentChannel - 1]}")
+    }
+
+    fun switchPreviousChannel() {
+        if (!isOn) {
+            turnOn()
+        }
+        currentChannel = if (currentChannel == 1) channels.size else currentChannel - 1
+        println("$brand $model switched to channel $currentChannel: ${channels[currentChannel - 1]}")
+    }
+
+    fun showChannels() {
+        println("$brand $model channels:")
+        channels.forEachIndexed { index, channel ->
+            println("${index + 1} - $channel")
+        }
+    }
+}
+
+object Channels {
+    private val allChannels = listOf(
+        "BBC", "CNN", "Discovery", "ESPN", "Fox News", "HBO", "MTV", "National Geographic", "NBC", "TNT"
+    )
+
+    fun getRandomChannels(n: Int): List<String> {
+        return allChannels.shuffled().take(n)
+    }
+}
+
+
+ОСНОВНАЯ ПРОГРАММА
+
+fun main() {
+    val tv1 = TV("Samsung", "UE55TU8000U", 30, 5)
+    val tv2 = TV("LG", "OLED55CXPUA", 40, 10)
+println("TV 1: brand ${tv1.brand}, model ${tv1.model}, diagonal size ${tv1.diagonalSize}")
+    tv1.showChannels()
+    tv2.showChannels()
+
+    tv1.turnOn()
+    tv1.increaseVolume(50)
+    tv1.switchChannel(3)
+    tv1.decreaseVolume(20)
+    tv1.switchNextChannel()
+    tv1.switchNextChannel()
+    tv1.switchPreviousChannel()
+    tv1.turnOff()
+
+    tv2.turnOn()
+    tv2.switchChannel(10)
+    tv2.switchNextChannel()
+    tv2.switchNextChannel()
+    tv2.switchPreviousChannel()
+    tv2.switchPreviousChannel()
+    tv2.switchPreviousChannel()
+    tv2.switchPreviousChannel()
+    tv2.switchNextChannel()
+    tv2.increaseVolume(30)
+    tv2.decreaseVolume(50)
+    tv2.turnOff()
+}
