@@ -1,0 +1,68 @@
+import Fibonacci.take
+import kotlinx.coroutines.*
+import java.math.BigInteger
+
+fun main(): Unit = runBlocking {
+    val number1 = launch {
+        try {
+            withTimeout(3000) {
+                take(500000)
+            }
+        } catch (e: IllegalArgumentException) {
+            println("Ошибка: Число должно быть больше или равно 1.")
+        } catch (e: TimeoutCancellationException) {
+            println("\nОшибка: Превышение времени вычисления.")
+        }
+    }
+    val number2 = launch {
+        try {
+            withTimeout(5000) {
+                take(0)
+            }
+        } catch (e: IllegalArgumentException) {
+            println("Ошибка: Число должно быть больше или равно 1.")
+        } catch (e: TimeoutCancellationException) {
+            println("\nОшибка: Время вышло.")
+        }
+    }
+    val number3 = launch {
+        try {
+            withTimeout(5000) {
+                take(10)
+            }
+        } catch (e: IllegalArgumentException) {
+            println("Ошибка: Число должно быть больше или равно 1.")
+        } catch (e: TimeoutCancellationException) {
+            println("\nОшибка: Время вышло.")
+        }
+    }
+    launch {
+        while (!number1.isCompleted || !number2.isCompleted || !number3.isCompleted) {
+            delay(100)
+            print(".")
+        }
+        println("Вычисления всех чисел Фибоначчи завершены!")
+    }
+}
+
+object Fibonacci {
+    suspend fun take(n: Int): BigInteger = coroutineScope {
+        var number1 = BigInteger.ZERO
+        var number2 = BigInteger.ONE
+        var number3 = number1 + number2
+        if (n < 1) {
+            yield()
+            throw IllegalArgumentException("Некорректный аргумент")
+        } else if (n == 1) println("Число Фибоначчи под номером 1: $number1.")
+        else {
+            repeat(n - 2) {
+                yield()
+                number3 = number1 + number2
+                number1 = number2
+                number2 = number3
+            }
+            println("Число Фибоначчи под номером $n: $number3.")
+        }
+        return@coroutineScope number3
+    }
+}
