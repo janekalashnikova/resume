@@ -1,0 +1,39 @@
+import kotlin.collections.mutableListOf
+fun main() {
+    var enteredNumber: Int
+    do {
+        println(message = "Enter a number. The number must be > 0.")
+        enteredNumber = readlnOrNull()?.toIntOrNull() ?: return
+    } while (enteredNumber <= 0)
+    listOfPhoneNumbers(enteredNumber)
+}
+fun listOfPhoneNumbers(n: Int) {
+    var phoneNumber: String
+    val phoneNumberList = mutableListOf<String>()
+    for (i in 1..n) {
+        println(message = "Enter a phone number which must begin with '+7' and consists of 12 symbols.")
+        phoneNumber = readlnOrNull().toString()
+        phoneNumberList.add(phoneNumber)
+    }
+    //println("All phone numbers: $phoneNumberList")
+    val phoneNumberList2 = phoneNumberList.filter { it.startsWith("+7") }
+    //println("All phone numbers start with '+7': $phoneNumberList2")
+    //println("The quantity of unique phone numbers: ${phoneNumberList.toSortedSet().size}")
+    //println("The sum of the lengths of all phone numbers: ${phoneNumberList.sumOf{it.length}}")
+    val listNumberNameDop = phoneNumberList2.toSortedSet().toMutableList()
+    //println(listNumberNameDop)
+    val phoneBook = mutableMapOf<String, String>()
+    for (i in 0..<listNumberNameDop.size) {
+        print ("Введите имя человека с номером телефона ${listNumberNameDop[i]}: ")
+        val name = readlnOrNull().toString()
+        phoneBook[listNumberNameDop[i]] = name
+    }
+    println("Телефонная книга, отсортированная по номерам телефонов:")
+    for ((number, name) in phoneBook.toSortedMap()) {
+        println("Абонент: $name. Номер телефона: $number")
+    }
+    println("Телефонная книга, отсортированная по именам абонентов:")
+    for ((number, name) in phoneBook.toSortedMap(compareBy { phoneBook[it] })) {
+        println("Абонент: $name. Номер телефона: $number")
+    }
+}
